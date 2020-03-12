@@ -1,4 +1,4 @@
-export class Bracket {
+class Bracket {
   constructor(top, bottom, eventId, winner = null) {
     this.winner = winner
     this.top = top
@@ -7,7 +7,7 @@ export class Bracket {
   }
 }
 
-export class Competition {
+class Competition {
   constructor(eventId) {
     this.participants = []
     this.eventId = eventId
@@ -23,6 +23,17 @@ export class Competition {
       console.log('This event has already begun. Cannot add more participants.')
       return false
     }
+  }
+
+  seed() {
+    let participantsCopy = [...this.participants]
+    let result = []
+    while (participantsCopy.length > 0) {
+      result.push(participantsCopy.pop())
+      result.push(participantsCopy.shift())
+    }
+
+    this.participants = result
   }
 
   buildBracket(
@@ -57,4 +68,26 @@ export class Competition {
       return currentBracket
     }
   }
+
+  start() {
+    if (this.started) {
+      console.log('Already started!')
+    } else {
+      this.started = true
+      this.seed()
+      this.buildBracket()
+    }
+  }
 }
+
+let test = new Competition('test')
+test.addParticipant('1')
+test.addParticipant('2')
+test.addParticipant('3')
+test.addParticipant('4')
+console.log('Current Participants: ', test.participants)
+console.log('Building Bracket...')
+test.start()
+console.log(test.bracket)
+
+module.exports = {Competition, Bracket}
