@@ -88,6 +88,7 @@ test.addParticipant('4')
 console.log('Current Participants: ', test.participants)
 console.log('Building Bracket...')
 test.start()
-console.log(test.bracket)
+console.log(JSON.stringify(test.bracket))
+console.log(JSON.parse(JSON.stringify(test.bracket)))
 
 module.exports = {Competition, Bracket}
