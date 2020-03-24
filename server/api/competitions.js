@@ -71,3 +71,17 @@ router.post('/:id/participants', async (req, res, next) => {
     next(error)
   }
 })
+
+router.delete('/:id/participants', async (req, res, next) => {
+  try {
+    const participant = await Participant.findOne({
+      where: {userId: req.body.userId, competitionId: req.params.id}
+    })
+    if (participant) {
+      await participant.destroy()
+      res.status(200).send(participant)
+    }
+  } catch (error) {
+    next(error)
+  }
+})
