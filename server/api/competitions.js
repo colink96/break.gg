@@ -1,6 +1,12 @@
 /* eslint-disable complexity */
 const router = require('express').Router()
-const {Competition, Battle, User, Participant} = require('../db/models')
+const {
+  Competition,
+  Battle,
+  User,
+  Participant,
+  Matchup
+} = require('../db/models')
 module.exports = router
 
 router.get('/', async (req, res, next) => {
@@ -41,25 +47,38 @@ router.get('/:id', async (req, res, next) => {
 router.put('/:id', async (req, res, next) => {
   try {
     const comp = await Competition.findByPk(req.params.id)
-    comp.started = true
-    await comp.save()
     const participants = await Participant.findAll({
       where: {competitionId: req.params.id}
     })
-    let matchCounter = participants.length / 2
-    let roundCounter = 1
-    while (matchCounter >= 1) {
-      for (let i = 0; i < matchCounter; i++) {
-        await Battle.create({
-          round: roundCounter,
-          match: i,
-          competitionId: req.params.id
-        })
+    if (comp.started) {
+      res.send(comp)
+    } else if (
+      participants.length === 2 ||
+      participants.length === 4 ||
+      participants.length === 8 ||
+      participants.length === 16 ||
+      participants.length === 32 ||
+      participants.length === 64
+    ) {
+      comp.started = true
+      await comp.save()
+      let matchCounter = participants.length / 2
+      let roundCounter = 1
+      while (matchCounter >= 1) {
+        for (let i = 0; i < matchCounter; i++) {
+          await Battle.create({
+            round: roundCounter,
+            match: i,
+            competitionId: req.params.id
+          })
+        }
+        matchCounter = matchCounter / 2
+        roundCounter += 1
       }
-      matchCounter = matchCounter / 2
-      roundCounter += 1
+      res.send(comp)
+    } else {
+      res.sendStatus(400)
     }
-    res.send(comp)
   } catch (error) {
     next(error)
   }
