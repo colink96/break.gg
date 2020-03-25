@@ -66,7 +66,7 @@ router.put('/:id', async (req, res, next) => {
       let roundCounter = 1
       while (matchCounter >= 1) {
         for (let i = 0; i < matchCounter; i++) {
-          await Battle.create({
+          let battle = await Battle.create({
             round: roundCounter,
             match: i,
             competitionId: req.params.id
@@ -128,6 +128,17 @@ router.delete('/:id/participants', async (req, res, next) => {
       await participant.destroy()
       res.status(200).send(participant)
     }
+  } catch (error) {
+    next(error)
+  }
+})
+
+router.get('/:id/battles', async (req, res, next) => {
+  try {
+    const battles = await Battle.findAll({
+      where: {competitionId: req.params.id}
+    })
+    res.send(battles)
   } catch (error) {
     next(error)
   }
