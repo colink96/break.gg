@@ -1,3 +1,4 @@
+/* eslint-disable complexity */
 const router = require('express').Router()
 const {Competition, Battle, User, Participant} = require('../db/models')
 module.exports = router
@@ -31,6 +32,33 @@ router.get('/:id', async (req, res, next) => {
     const comp = await Competition.findByPk(req.params.id, {
       include: [{model: User}, {model: Battle}]
     })
+    res.send(comp)
+  } catch (error) {
+    next(error)
+  }
+})
+
+router.put('/:id', async (req, res, next) => {
+  try {
+    const comp = await Competition.findByPk(req.params.id)
+    comp.started = true
+    await comp.save()
+    const participants = await Participant.findAll({
+      where: {competitionId: req.params.id}
+    })
+    let matchCounter = participants.length / 2
+    let roundCounter = 1
+    while (matchCounter >= 1) {
+      for (let i = 0; i < matchCounter; i++) {
+        await Battle.create({
+          round: roundCounter,
+          match: i,
+          competitionId: req.params.id
+        })
+      }
+      matchCounter = matchCounter / 2
+      roundCounter += 1
+    }
     res.send(comp)
   } catch (error) {
     next(error)
