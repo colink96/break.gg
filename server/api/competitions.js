@@ -50,6 +50,7 @@ router.put('/:id', async (req, res, next) => {
     const participants = await Participant.findAll({
       where: {competitionId: req.params.id}
     })
+    let participantsCopy = [...participants]
     if (comp.started) {
       res.send(comp)
     } else if (
@@ -63,7 +64,7 @@ router.put('/:id', async (req, res, next) => {
       comp.started = true
       await comp.save()
       let matchCounter = participants.length / 2
-      let roundCounter = 1
+      let roundCounter = 0
       while (matchCounter >= 1) {
         for (let i = 0; i < matchCounter; i++) {
           let battle = await Battle.create({
@@ -71,6 +72,18 @@ router.put('/:id', async (req, res, next) => {
             match: i,
             competitionId: req.params.id
           })
+          if (roundCounter === 0) {
+            await Matchup.create({
+              win: false,
+              userId: participantsCopy.pop().userId,
+              battleId: battle.id
+            })
+            await Matchup.create({
+              win: false,
+              userId: participantsCopy.pop().userId,
+              battleId: battle.id
+            })
+          }
         }
         matchCounter = matchCounter / 2
         roundCounter += 1
