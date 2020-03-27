@@ -149,9 +149,54 @@ router.delete('/:id/participants', async (req, res, next) => {
 router.get('/:id/battles', async (req, res, next) => {
   try {
     const battles = await Battle.findAll({
-      where: {competitionId: req.params.id}
+      where: {competitionId: req.params.id},
+      include: {model: User}
     })
     res.send(battles)
+  } catch (error) {
+    next(error)
+  }
+})
+
+router.get('/:id/battles/:round/:match', async (req, res, next) => {
+  try {
+    const battle = await Battle.findOne({
+      where: {
+        competitionId: req.params.id,
+        round: req.params.round,
+        match: req.params.match
+      },
+      include: {model: User}
+    })
+    res.send(battle)
+  } catch (error) {
+    next(error)
+  }
+})
+
+router.put('/:id/battles/:round/:match', async (req, res, next) => {
+  try {
+    const battle = await Battle.findOne({
+      where: {
+        competitionId: req.params.id,
+        round: req.params.round,
+        match: req.params.match
+      },
+      include: {model: User}
+    })
+    if (!battle.userId) {
+      const winner = await User.findByPk(req.body.userId)
+      if (winner) {
+        const matchup = await Matchup.findOne({
+          where: {battleId: battle.id, userId: winner.id}
+        })
+        battle.userId = req.body.userId
+        matchup.win = true
+        await battle.save()
+        await matchup.save()
+      }
+    }
+    res.sendStatus(200)
   } catch (error) {
     next(error)
   }
