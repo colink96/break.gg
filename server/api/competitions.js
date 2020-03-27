@@ -184,19 +184,47 @@ router.put('/:id/battles/:round/:match', async (req, res, next) => {
       },
       include: {model: User}
     })
-    if (!battle.userId) {
-      const winner = await User.findByPk(req.body.userId)
-      if (winner) {
-        const matchup = await Matchup.findOne({
-          where: {battleId: battle.id, userId: winner.id}
-        })
-        battle.userId = req.body.userId
-        matchup.win = true
-        await battle.save()
-        await matchup.save()
+    const matchups = await Matchup.findAll({where: {battleId: battle.id}})
+    const singleMatchup = matchups.filter(mu => {
+      return mu.userId === req.params.userId
+    })[0]
+    if (singleMatchup) {
+      if (!battle.userId) {
+        const winner = await User.findByPk(req.body.userId)
+        if (winner) {
+          let nextMatchCounter
+          if (req.params.match % 2 === 0) {
+            nextMatchCounter = req.params.match / 2
+          } else {
+            nextMatchCounter = (req.params.match - 1) / 2
+          }
+          const matchup = await Matchup.findOne({
+            where: {battleId: battle.id, userId: winner.id}
+          })
+          const nextBattle = await Battle.findOne({
+            where: {
+              competitionId: req.params.id,
+              round: req.params.round + 1,
+              match: nextMatchCounter
+            }
+          })
+          const nextMatchup = await Matchup.create({
+            userId: winner.id,
+            battleId: nextBattle.id,
+            win: false
+          })
+          battle.userId = req.body.userId
+          matchup.win = true
+          await battle.save()
+          await matchup.save()
+          res.sendStatus(200)
+        }
+      } else {
+        res.status(404).send('Not found')
       }
+    } else {
+      res.sendStatus(304)
     }
-    res.sendStatus(200)
   } catch (error) {
     next(error)
   }
