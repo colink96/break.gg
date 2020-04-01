@@ -1,6 +1,7 @@
 import React from 'react'
 import {connect} from 'react-redux'
 import {gotAllComps} from '../store/competition'
+import {Competition} from './competition'
 
 class DisconnectedAllComps extends React.Component {
   constructor() {
@@ -18,7 +19,7 @@ class DisconnectedAllComps extends React.Component {
         <ul>
           {this.props.allComps.length &&
             this.props.allComps.map(comp => {
-              return <li key={comp.id}>{comp.name}</li>
+              return <Competition key={comp.key} comp={comp} />
             })}
         </ul>
       </div>
