@@ -16,16 +16,16 @@ async function seed() {
   const comps = await Promise.all([
     Competition.create({
       name: 'Breaks U',
-      day: 28,
-      month: 3,
-      year: 2020,
+      description: 'Was gonna be hype but got cancelled :(',
+      date: 'March 28, 2020',
+      time: '3PM',
       location: 'Suffolk Street'
     }),
     Competition.create({
       name: 'My Jam',
-      day: 20,
-      month: 4,
-      year: 2020,
+      description: 'Was gonna be hype but got cancelled :(',
+      date: 'April 1, 2020',
+      time: '3PM',
       location: 'My House'
     })
   ])

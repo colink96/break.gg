@@ -11,7 +11,7 @@ module.exports = router
 
 router.get('/', async (req, res, next) => {
   try {
-    const comps = await Competition.findAll()
+    const comps = await Competition.findAll({order: [['id', 'ASC']]})
     res.send(comps)
   } catch (error) {
     next(error)

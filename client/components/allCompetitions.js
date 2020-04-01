@@ -16,12 +16,10 @@ class DisconnectedAllComps extends React.Component {
   render() {
     return (
       <div>
-        <ul>
-          {this.props.allComps.length &&
-            this.props.allComps.map(comp => {
-              return <Competition key={comp.key} comp={comp} />
-            })}
-        </ul>
+        {this.props.allComps.length &&
+          this.props.allComps.map(comp => {
+            return <Competition key={comp.id} comp={comp} />
+          })}
       </div>
     )
   }
